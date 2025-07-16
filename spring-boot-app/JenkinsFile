@@ -6,14 +6,9 @@ pipeline {
     }
   }
   stages {
-    stage('Clean Workspace') {
-        steps {
-            deleteDir()
-        }
-    }
     stage('Checkout') {
       steps {
-        sh 'echo passed'
+        // sh 'echo passed'
         git branch: 'main', url: 'https://github.com/Vishwadeep91/jenkins_pipeline_demo.git'
       }
     }
