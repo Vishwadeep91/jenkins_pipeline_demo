@@ -55,8 +55,13 @@ pipeline {
             GIT_USER_NAME = "Vishwadeep91"
         }
         steps {
+          dir('.'){
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
+                    # --- CRITICAL ADDITION FOR "DUBIOUS OWNERSHIP" ISSUE ---
+                    git config --global --add safe.directory "*"
+                    # -------------------------------------------------------
+
                     pwd
                     ls -al
                     ls -al .git
@@ -70,6 +75,7 @@ pipeline {
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                 '''
             }
+          }
         }
     }
   }
