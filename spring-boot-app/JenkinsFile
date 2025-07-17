@@ -51,6 +51,17 @@ pipeline {
         }
       }
     }
+    stage('Debug Git') {
+      steps {
+        sh '''
+          echo "Current directory: $(pwd)"
+          echo "Files:"
+          ls -a
+          echo "Inside spring-boot-app:"
+          ls -a spring-boot-app || true
+        '''
+      }
+    }
     stage('Update Deployment File') {
         environment {
             GIT_REPO_NAME = "jenkins_pipeline_demo"
