@@ -6,6 +6,11 @@ pipeline {
     }
   }
   stages {
+    stage('Clean Workspace') {
+      steps {
+        sh 'sudo rm -rf /var/lib/jenkins/workspace/java-spring-pipeline/* || true'
+      }
+    }
     stage('Checkout') {
       steps {
         // sh 'echo passed'
@@ -17,11 +22,6 @@ pipeline {
         // sh 'ls -ltr'
         // build the project and create a JAR file
         sh 'cd spring-boot-app && mvn clean package'
-      }
-    }
-    stage('Verify Java') {
-      steps {
-        sh 'java -version'
       }
     }
     stage('Static Code Analysis') {
