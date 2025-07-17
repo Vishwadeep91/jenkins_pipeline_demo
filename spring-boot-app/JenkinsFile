@@ -53,10 +53,11 @@ pipeline {
         steps {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {           
                 sh '''
-                    echo "[INFO] Inside workspace: $(pwd)"
-                    echo "[INFO] Listing all files:"
-                    ls -a
+                  echo "[INFO] Inside workspace: $(pwd)"
+                  echo "[INFO] Listing all files:"
+                  ls -a
 
+                  if [ -d .git ]; then
                     git config user.email "vishwadeeppola@gmail.com"
                     git config user.name "Vishwadeep91"
 
@@ -69,6 +70,10 @@ pipeline {
                     git add spring-boot-app-manifests/deployment.yaml || true
                     git diff --cached --quiet || git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                  else
+                    echo "[ERROR] Not in a git repository"
+                    exit 1
+                  fi
                 '''
             }
         }
