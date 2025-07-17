@@ -5,10 +5,13 @@ pipeline {
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
     }
   }
+  options {
+    skipDefaultCheckout()  
+  }
   stages {
     stage('Clean Workspace') {
       steps {
-        sh 'sudo rm -rf /var/lib/jenkins/workspace/java-maven-demo/* || true'
+        deleteDir() // Built-in Jenkins method to clean workspace
       }
     }
     stage('Checkout') {
@@ -51,17 +54,6 @@ pipeline {
         }
       }
     }
-    stage('Debug Git') {
-      steps {
-        sh '''
-          echo "Current directory: $(pwd)"
-          echo "Files:"
-          ls -a
-          echo "Inside spring-boot-app:"
-          ls -a spring-boot-app || true
-        '''
-      }
-    }
     stage('Update Deployment File') {
         environment {
             GIT_REPO_NAME = "jenkins_pipeline_demo"
@@ -69,15 +61,23 @@ pipeline {
         }
         steps {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-            dir('.'){
+            dir('.') {
                 sh '''
-                    echo "PWD: $(pwd)"
+                    echo "[INFO] Inside workspace: $(pwd)"
+                    echo "[INFO] Listing all files:"
+                    ls -a
+
                     git config user.email "vishwadeeppola@gmail.com"
                     git config user.name "Vishwadeep91"
-                    BUILD_NUMBER=${BUILD_NUMBER}
+
+                    echo "[INFO] Updating image tag in deployment.yaml"
                     sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yaml
-                    git add spring-boot-app-manifests/deployment.yaml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+
+                    echo "[INFO] Git Status:"
+                    git status
+
+                    git add spring-boot-app-manifests/deployment.yaml || true
+                    git diff --cached --quiet || git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                 '''
               }
