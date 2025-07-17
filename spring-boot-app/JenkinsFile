@@ -8,8 +8,8 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        // sh 'echo passed'
-        checkout scm
+        sh 'echo passed'
+        // checkout scm
       }
     }
     stage('Build and Test') {
@@ -51,29 +51,15 @@ pipeline {
             GIT_USER_NAME = "Vishwadeep91"
         }
         steps {
-            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {           
+            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                  echo "[INFO] Inside workspace: $(pwd)"
-                  echo "[INFO] Listing all files:"
-                  ls -a
-
-                  if [ -d .git ]; then
                     git config user.email "vishwadeeppola@gmail.com"
-                    git config user.name "Vishwadeep91"
-
-                    echo "[INFO] Updating image tag in deployment.yaml"
+                    git config user.name "vishwadeep pola"
+                    BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yaml
-
-                    echo "[INFO] Git Status:"
-                    git status
-
-                    git add spring-boot-app-manifests/deployment.yaml || true
-                    git diff --cached --quiet || git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git add spring-boot-app-manifests/deployment.yaml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                  else
-                    echo "[ERROR] Not in a git repository"
-                    exit 1
-                  fi
                 '''
             }
         }
